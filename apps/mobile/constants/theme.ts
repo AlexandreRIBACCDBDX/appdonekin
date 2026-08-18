@@ -49,6 +49,7 @@ export const palette = {
   violet500: '#9457F7',
   violetMuted: 'rgba(148,87,247,0.16)',
   pink500: '#EF4ECF',
+  pinkMuted: 'rgba(239,78,207,0.16)',
   lavender: '#CDBDFF',
 
   mist300: '#9793AD',
@@ -99,8 +100,8 @@ export const darkColors = {
   primary: palette.violet500,
   primaryMuted: palette.violetMuted,
 
-  dones: palette.gold500,
-  donesMuted: palette.night700,
+  dones: palette.pink500,
+  donesMuted: palette.pinkMuted,
 
   success: palette.green600,
   successMuted: palette.night700,

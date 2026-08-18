@@ -8,17 +8,14 @@ export function LogoTile({ size = 56 }: { size?: number }) {
         width: size,
         height: size,
         borderRadius: size * 0.28,
-        backgroundColor: '#FF5A36',
+        backgroundColor: '#161225',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.08)',
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#FF5A36',
-        shadowOpacity: 0.35,
-        shadowRadius: 12,
-        shadowOffset: { width: 0, height: 6 },
-        elevation: 4,
       }}
     >
-      <DoneKinMark size={size * 0.52} />
+      <DoneKinMark size={size * 0.66} />
     </View>
   );
 }

@@ -50,6 +50,10 @@ export function useUpdateMemberProfile(circleId: string) {
       updateMemberProfile(params.memberId, params.fields),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.members(circleId) });
+      // The edited member might be the viewer themselves — ActiveCircleProvider's
+      // `myMembership` (and anything reading it, e.g. the header avatar) is a
+      // separate query key and won't pick up the change without this.
+      queryClient.invalidateQueries({ queryKey: queryKeys.myMembership(circleId) });
     },
   });
 }

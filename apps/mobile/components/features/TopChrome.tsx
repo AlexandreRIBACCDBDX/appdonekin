@@ -26,13 +26,17 @@ export function TopChrome({ variant = 'circle', title, eyebrow }: TopChromeProps
   const { myMembership } = useActiveCircle();
   const { data: wallet } = useWallet(myMembership?.id ?? null);
   const firstName = profile?.full_name?.split(' ')[0] ?? '';
+  // circle_members.avatar_url, not profiles.avatar_url — it's the column
+  // every other avatar in the app (task rows, member lists) already reads,
+  // and the one the photo-upload flow writes to.
+  const avatarUri = myMembership?.avatar_url;
 
   return (
     <View style={[styles.row, { paddingHorizontal: spacing.xl, paddingTop: spacing.lg, paddingBottom: spacing.sm }]}>
       <View style={styles.left}>
         <LinearGradient colors={gradients.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.ring}>
           <View style={[styles.ringInner, { backgroundColor: colors.background }]}>
-            <Avatar name={profile?.full_name ?? '?'} uri={profile?.avatar_url} size={38} />
+            <Avatar name={profile?.full_name ?? '?'} uri={avatarUri} size={38} />
           </View>
         </LinearGradient>
 

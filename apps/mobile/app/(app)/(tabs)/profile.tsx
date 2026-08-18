@@ -7,6 +7,7 @@ import { TopChrome } from '@/components/features/TopChrome';
 import { BottomNav } from '@/components/features/BottomNav';
 import { Card } from '@/components/ui/Card';
 import { DonesAmount } from '@/components/ui/DonesAmount';
+import { EditableAvatar } from '@/components/features/EditableAvatar';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/providers/AuthProvider';
 import { useActiveCircle } from '@/providers/ActiveCircleProvider';
@@ -21,7 +22,7 @@ const LINKS = [
 
 export default function ProfileScreen() {
   const { colors, spacing, radius, typography, gradients } = useTheme();
-  const { signOut } = useAuth();
+  const { profile, signOut } = useAuth();
   const { myMembership } = useActiveCircle();
   const { data: wallet } = useWallet(myMembership?.id ?? null);
 
@@ -29,6 +30,19 @@ export default function ProfileScreen() {
     <Screen padded={false}>
       <TopChrome variant="circle" title="Mon profil" />
       <ScrollView contentContainerStyle={{ padding: spacing.xl, gap: spacing.xxl, paddingBottom: spacing.huge }}>
+        {myMembership ? (
+          <View style={{ alignItems: 'center', gap: spacing.sm }}>
+            <EditableAvatar
+              memberId={myMembership.id}
+              name={profile?.full_name ?? myMembership.first_name}
+              uri={myMembership.avatar_url}
+              size={88}
+              canEdit
+            />
+            <Text style={[typography.heading, { color: colors.textPrimary }]}>{profile?.full_name ?? myMembership.first_name}</Text>
+          </View>
+        ) : null}
+
         <LinearGradient
           colors={gradients.primary}
           start={{ x: 0, y: 0 }}

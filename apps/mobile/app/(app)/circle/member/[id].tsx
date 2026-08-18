@@ -6,6 +6,7 @@ import { Screen } from '@/components/ui/Screen';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
+import { EditableAvatar } from '@/components/features/EditableAvatar';
 import { Badge } from '@/components/ui/Badge';
 import { DonesAmount } from '@/components/ui/DonesAmount';
 import { LoadingState } from '@/components/ui/LoadingState';
@@ -47,6 +48,14 @@ export default function MemberDetailsScreen() {
 
   if (!member || !circle) return <LoadingState />;
 
+  // Mirrors can_edit_member_profile() (the DB permission that already
+  // governs this write): the member themselves, a circle admin, or a
+  // guardian whose relationship has can_edit_profile set.
+  const canEditPhoto =
+    member.id === myMembership?.id ||
+    isAdmin ||
+    myGuardians.some((g) => g.guardian_member_id === myMembership?.id && g.can_edit_profile);
+
   const age = member.birth_date
     ? Math.floor((Date.now() - new Date(member.birth_date).getTime()) / (365.25 * 24 * 3600 * 1000))
     : null;
@@ -60,7 +69,7 @@ export default function MemberDetailsScreen() {
     <Screen scroll>
       <View style={{ gap: spacing.xxl }}>
         <View style={{ alignItems: 'center', gap: spacing.sm }}>
-          <Avatar name={member.first_name} uri={member.avatar_url} size={80} />
+          <EditableAvatar memberId={member.id} name={member.first_name} uri={member.avatar_url} size={80} canEdit={canEditPhoto} />
           <Text style={[typography.title, { color: colors.textPrimary }]}>
             {member.first_name}
             {age !== null ? ` · ${age} ans` : ''}

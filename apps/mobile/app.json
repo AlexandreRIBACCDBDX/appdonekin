@@ -33,7 +33,13 @@
       "expo-secure-store",
       "expo-splash-screen",
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "DoneKin a besoin d'accéder à tes photos pour changer une photo de profil."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

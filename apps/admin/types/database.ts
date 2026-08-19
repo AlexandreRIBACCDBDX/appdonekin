@@ -26,7 +26,8 @@ export type PointTransactionType =
   | 'bonus'
   | 'refund'
   | 'admin_adjustment'
-  | 'late_penalty';
+  | 'late_penalty'
+  | 'project_payment';
 export type InvitationStatus = 'pending' | 'accepted' | 'declined' | 'expired' | 'revoked';
 export type ProfileStatus = 'active' | 'suspended' | 'disabled' | 'deleted';
 export type PlatformRole = 'super_admin' | 'admin' | 'support' | 'moderator' | 'read_only';
@@ -530,6 +531,10 @@ export type Database = {
         Returns: ProjectPromiseVote;
       };
       complete_project: { Args: { p_project_id: string }; Returns: Json };
+      contribute_to_project: {
+        Args: { p_project_id: string; p_amount: number; p_note?: string | null };
+        Returns: void;
+      };
       complete_task: {
         Args: { p_task_id: string; p_performed_by_member_id: string; p_notes?: string | null };
         Returns: TaskCompletion;

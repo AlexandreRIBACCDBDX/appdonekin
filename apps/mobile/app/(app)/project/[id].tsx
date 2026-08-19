@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Alert, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Screen } from '@/components/ui/Screen';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { TextField } from '@/components/ui/TextField';
 import { Badge, PointsPill } from '@/components/ui/Badge';
 import { DonesAmount } from '@/components/ui/DonesAmount';
+import { DonesCoinIcon } from '@/components/ui/DonesCoinIcon';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { MemberRow } from '@/components/features/MemberRow';
@@ -15,6 +17,7 @@ import {
   useAddProjectMember,
   useCastPromiseVote,
   useCompleteProject,
+  useContributeToProject,
   useProjectMembers,
   useProjects,
   useProjectTasks,
@@ -23,7 +26,10 @@ import {
   useRemoveProjectMember,
 } from '@/hooks/useProjects';
 import { useCircleMembers } from '@/hooks/useMembers';
+import { useWallet } from '@/hooks/useWallet';
 import { projectProgress } from '@/services/projects';
+
+const CONTRIBUTE_PRESETS = [5, 10, 20, 50];
 
 export default function ProjectDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -39,7 +45,11 @@ export default function ProjectDetailsScreen() {
   const completeProject = useCompleteProject(circle?.id ?? '');
   const addProjectMember = useAddProjectMember(id ?? '');
   const removeProjectMember = useRemoveProjectMember(id ?? '');
+  const { data: myWallet } = useWallet(myMembership?.id ?? null);
+  const contributeToProject = useContributeToProject(circle?.id ?? '');
   const [busy, setBusy] = useState(false);
+  const [contributing, setContributing] = useState(false);
+  const [contributeAmount, setContributeAmount] = useState('');
   const project = projects?.find((p) => p.id === id);
 
   if (isLoading || !project) return <LoadingState />;
@@ -96,6 +106,25 @@ export default function ProjectDetailsScreen() {
         },
       },
     ]);
+  };
+
+  const parsedContribution = contributeAmount.trim() ? Number(contributeAmount.trim().replace(',', '.')) : null;
+  const myBalance = myWallet?.balance ?? 0;
+  const canAffordContribution = !!parsedContribution && parsedContribution > 0 && parsedContribution <= myBalance;
+
+  const onContribute = async () => {
+    if (!parsedContribution) return;
+    try {
+      await contributeToProject.mutateAsync({ projectId: project.id, amount: parsedContribution });
+      setContributing(false);
+      setContributeAmount('');
+    } catch (err) {
+      const message =
+        err instanceof Error && err.message === 'insufficient_points'
+          ? "Tu n'as pas assez de Dones dans ton wallet."
+          : 'Une erreur est survenue.';
+      Alert.alert('Contribution impossible', message);
+    }
   };
 
   return (
@@ -161,6 +190,64 @@ export default function ProjectDetailsScreen() {
                   : `Encore ${targetPoints - poolBalance} Dones avant de pouvoir clôturer le projet.`}
               </Text>
             </>
+          ) : null}
+
+          {project.status !== 'completed' ? (
+            contributing ? (
+              <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+                  {CONTRIBUTE_PRESETS.map((value) => {
+                    const selected = parsedContribution === value;
+                    return (
+                      <Pressable
+                        key={value}
+                        onPress={() => setContributeAmount(String(value))}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 6,
+                          paddingVertical: spacing.sm,
+                          paddingHorizontal: spacing.lg,
+                          borderRadius: radius.full,
+                          borderWidth: 1.4,
+                          borderColor: selected ? colors.dones : colors.border,
+                          backgroundColor: selected ? colors.donesMuted : colors.surface,
+                        }}
+                      >
+                        <DonesCoinIcon size={12} />
+                        <Text style={{ color: selected ? colors.dones : colors.textPrimary, fontWeight: '600' }}>{value}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <TextField
+                  value={contributeAmount}
+                  onChangeText={setContributeAmount}
+                  keyboardType="numeric"
+                  placeholder="Ou un autre montant"
+                />
+                <Text style={[typography.caption, { color: colors.textMuted }]}>
+                  Ton wallet : {myBalance} Dones disponibles.
+                </Text>
+                <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                  <Button label="Annuler" variant="secondary" onPress={() => setContributing(false)} style={{ flex: 1 }} />
+                  <Button
+                    label="Confirmer"
+                    onPress={onContribute}
+                    loading={contributeToProject.isPending}
+                    disabled={!canAffordContribution}
+                    style={{ flex: 1 }}
+                  />
+                </View>
+              </View>
+            ) : (
+              <Button
+                label="Contribuer avec mon wallet"
+                variant="secondary"
+                onPress={() => setContributing(true)}
+                style={{ marginTop: spacing.md }}
+              />
+            )
           ) : null}
         </Card>
 

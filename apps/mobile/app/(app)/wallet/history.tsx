@@ -21,6 +21,7 @@ const TYPE_LABELS: Record<PointTransactionType, string> = {
   refund: 'Remboursement',
   admin_adjustment: 'Ajustement DoneKin',
   late_penalty: 'Pénalité de retard',
+  project_payment: 'Investi dans un projet',
 };
 
 export default function WalletHistoryScreen() {

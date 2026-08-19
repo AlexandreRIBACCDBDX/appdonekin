@@ -19,6 +19,8 @@ export function describeActivityEvent(event: ActivityEvent, members: CircleMembe
       return `🎁 ${subject} a utilisé ${event.points ? Math.abs(event.points) : ''} points pour "${name ?? 'une récompense'}"`;
     case 'points_transferred':
       return `💛 ${subject} a reçu ${event.points ?? ''} points`;
+    case 'project_payment':
+      return `🪙 ${subject} a investi ${event.points ?? ''} points dans "${title ?? 'un projet'}"`;
     case 'bonus':
       return `⭐ ${subject} a reçu un bonus de ${event.points ?? ''} points`;
     case 'member_joined':

@@ -99,6 +99,16 @@ export async function completeProject(projectId: string): Promise<{ promise_kept
   return data as { promise_kept: boolean };
 }
 
+// Pays Dones from the caller's own personal wallet into the project's pool.
+export async function contributeToProject(projectId: string, amount: number, note?: string | null): Promise<void> {
+  const { error } = await supabase.rpc('contribute_to_project', {
+    p_project_id: projectId,
+    p_amount: amount,
+    p_note: note ?? null,
+  });
+  if (error) throw error;
+}
+
 // Progress is Dones-based, not task-count-based: when the project has a
 // Dones target, it's the project wallet balance against that target; with
 // no target set, it falls back to (Dones of completed tasks) / (Dones of

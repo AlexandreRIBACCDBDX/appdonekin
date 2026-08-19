@@ -4,6 +4,7 @@ import {
   addProjectMember,
   castPromiseVote,
   completeProject,
+  contributeToProject,
   createProject,
   fetchProjectMembers,
   fetchProjectTasks,
@@ -102,6 +103,21 @@ export function useCompleteProject(circleId: string) {
       queryClient.invalidateQueries({ queryKey: queryKeys.activity(circleId) });
       queryClient.invalidateQueries({ queryKey: ['wallet'] });
       queryClient.invalidateQueries({ queryKey: queryKeys.projectWallet(projectId) });
+    },
+  });
+}
+
+export function useContributeToProject(circleId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (params: { projectId: string; amount: number; note?: string }) =>
+      contributeToProject(params.projectId, params.amount, params.note),
+    onSuccess: (_data, params) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.projectWallet(params.projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.projectMembers(params.projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.circleWallets(circleId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.activity(circleId) });
+      queryClient.invalidateQueries({ queryKey: ['wallet'] });
     },
   });
 }

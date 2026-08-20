@@ -9,6 +9,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useActiveCircle } from '@/providers/ActiveCircleProvider';
 import { TopChrome } from '@/components/features/TopChrome';
 import { BottomNav } from '@/components/features/BottomNav';
+import { ManagedChildrenBalances } from '@/components/features/ManagedChildrenBalances';
 import { Avatar } from '@/components/ui/Avatar';
 import { Card } from '@/components/ui/Card';
 import { PointsPill } from '@/components/ui/Badge';
@@ -42,7 +43,10 @@ export default function DashboardScreen() {
     [tasks, myMembership]
   );
 
-  const weeklyPoints = useMemo(() => (wallets ?? []).reduce((sum, w) => sum + Math.max(w.total_earned, 0), 0), [wallets]);
+  // The current user's own balance — not a circle-wide sum, and not
+  // total_earned (a lifetime gross counter): `balance` is the actual net
+  // amount they have to spend right now.
+  const myBalance = wallets?.find((w) => w.member_id === myMembership?.id)?.balance ?? 0;
 
   if (isLoading || !circle) return <LoadingState />;
 
@@ -58,13 +62,15 @@ export default function DashboardScreen() {
           />
         }
       >
+        <ManagedChildrenBalances />
+
         <Card style={{ padding: spacing.xl }}>
           <Text style={{ color: colors.textSecondary, fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase' }}>
-            {circle.name}
+            Ton solde
           </Text>
           <View style={{ marginTop: spacing.xs }}>
             <DonesAmount
-              value={weeklyPoints}
+              value={myBalance}
               size={24}
               gap={8}
               textStyle={{ color: colors.textPrimary, fontSize: 30, fontWeight: '800' }}

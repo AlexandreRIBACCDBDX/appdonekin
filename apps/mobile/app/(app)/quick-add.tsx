@@ -7,7 +7,6 @@ import { useTheme } from '@/hooks/useTheme';
 const OPTIONS = [
   { key: 'task', label: 'Une tâche', description: 'Assigne quelque chose à faire', icon: 'checkmark-circle-outline', href: '/(app)/task/create' },
   { key: 'project', label: 'Un projet', description: 'Organise plusieurs tâches ensemble', icon: 'folder-outline', href: '/(app)/project/create' },
-  { key: 'reward', label: 'Une récompense', description: "Ajoute quelque chose à débloquer avec des Dones", icon: 'gift-outline', href: '/(app)/rewards/create' },
 ] as const;
 
 export default function QuickAddScreen() {

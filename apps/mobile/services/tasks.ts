@@ -81,11 +81,15 @@ export async function completeTask(params: {
   taskId: string;
   performedByMemberId: string;
   notes?: string | null;
+  // Other members who helped — ignored server-side for a task linked to a
+  // project (its points go to the pool regardless of who did it).
+  sharedWithMemberIds?: string[] | null;
 }): Promise<TaskCompletion> {
   const { data, error } = await supabase.rpc('complete_task', {
     p_task_id: params.taskId,
     p_performed_by_member_id: params.performedByMemberId,
     p_notes: params.notes ?? null,
+    p_shared_with_member_ids: params.sharedWithMemberIds ?? null,
   });
   if (error) throw error;
   return data as TaskCompletion;

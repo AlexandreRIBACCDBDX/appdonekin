@@ -98,8 +98,12 @@ export function useCancelTask(circleId: string) {
 export function useCompleteTask(circleId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (params: { taskId: string; performedByMemberId: string; notes?: string | null }) =>
-      completeTask(params),
+    mutationFn: (params: {
+      taskId: string;
+      performedByMemberId: string;
+      notes?: string | null;
+      sharedWithMemberIds?: string[] | null;
+    }) => completeTask(params),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.task(variables.taskId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.taskCompletions(variables.taskId) });

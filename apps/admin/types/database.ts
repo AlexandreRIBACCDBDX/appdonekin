@@ -168,6 +168,7 @@ export type TaskCompletion = {
   validated_by_user_id: string | null;
   submitted_at: string;
   validated_at: string | null;
+  shared_with_member_ids: string[] | null;
 }
 
 export type Reward = {
@@ -373,7 +374,15 @@ type TaskInsert = OptionalKeys<
 >;
 type TaskCompletionInsert = OptionalKeys<
   TaskCompletion,
-  'id' | 'status' | 'points_awarded' | 'notes' | 'validated_by_member_id' | 'validated_by_user_id' | 'submitted_at' | 'validated_at'
+  | 'id'
+  | 'status'
+  | 'points_awarded'
+  | 'notes'
+  | 'validated_by_member_id'
+  | 'validated_by_user_id'
+  | 'submitted_at'
+  | 'validated_at'
+  | 'shared_with_member_ids'
 >;
 type RewardInsert = OptionalKeys<Reward, 'id' | 'description' | 'icon' | 'is_active' | 'requires_validation' | 'created_at' | 'archived_at'>;
 type RewardRedemptionInsert = OptionalKeys<
@@ -536,7 +545,12 @@ export type Database = {
         Returns: void;
       };
       complete_task: {
-        Args: { p_task_id: string; p_performed_by_member_id: string; p_notes?: string | null };
+        Args: {
+          p_task_id: string;
+          p_performed_by_member_id: string;
+          p_notes?: string | null;
+          p_shared_with_member_ids?: string[] | null;
+        };
         Returns: TaskCompletion;
       };
       validate_task_completion: {

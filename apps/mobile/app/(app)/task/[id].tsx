@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { Screen } from '@/components/ui/Screen';
+import { PopupScreen } from '@/components/features/PopupScreen';
 import { Button } from '@/components/ui/Button';
 import { Badge, PointsPill } from '@/components/ui/Badge';
 import { Avatar } from '@/components/ui/Avatar';
@@ -37,6 +37,7 @@ export default function TaskDetailsScreen() {
   const cancelTask = useCancelTask(circle?.id ?? '');
   const [busy, setBusy] = useState(false);
   const [performerId, setPerformerId] = useState<string | null>(null);
+  const [sharedWithIds, setSharedWithIds] = useState<string[]>([]);
 
   const assignee = members?.find((m) => m.id === task?.assigned_to_member_id);
   const creator = members?.find((m) => m.id === task?.created_by_member_id);
@@ -83,7 +84,11 @@ export default function TaskDetailsScreen() {
     if (!performerId) return;
     setBusy(true);
     try {
-      await completeTask.mutateAsync({ taskId: task.id, performedByMemberId: performerId });
+      await completeTask.mutateAsync({
+        taskId: task.id,
+        performedByMemberId: performerId,
+        sharedWithMemberIds: sharedWithIds.length > 0 ? sharedWithIds : undefined,
+      });
     } finally {
       setBusy(false);
     }
@@ -107,12 +112,19 @@ export default function TaskDetailsScreen() {
   const showPerformerPicker =
     (task.status === 'todo' || task.status === 'in_progress') && iManageAssignee && manageableMembers.length > 1;
 
+  // Sharing only makes sense for an orphan task — a project task's points
+  // go to the project's pool as one lump no matter who completed it.
+  const showHelperPicker =
+    !task.project_id && (task.status === 'todo' || task.status === 'in_progress') && iManageAssignee;
+  const helperCandidates = (members ?? []).filter((m) => m.id !== performerId);
+  const toggleHelper = (memberId: string) => {
+    setSharedWithIds((ids) => (ids.includes(memberId) ? ids.filter((id) => id !== memberId) : [...ids, memberId]));
+  };
+
   return (
-    <Screen scroll>
-      <View style={{ gap: spacing.xxl }}>
+    <PopupScreen title={task.title}>
         <View style={{ gap: spacing.sm }}>
           <Badge label={STATUS_LABELS[task.status] ?? task.status} tone={task.status === 'completed' ? 'success' : 'neutral'} />
-          <Text style={[typography.title, { color: colors.textPrimary }]}>{task.title}</Text>
           {task.description ? (
             <Text style={[typography.body, { color: colors.textSecondary }]}>{task.description}</Text>
           ) : null}
@@ -166,6 +178,16 @@ export default function TaskDetailsScreen() {
             <Text style={[typography.heading, { color: colors.textPrimary }]}>
               {members?.find((m) => m.id === pendingCompletion.performed_by_member_id)?.first_name} a terminé cette tâche
             </Text>
+            {pendingCompletion.shared_with_member_ids && pendingCompletion.shared_with_member_ids.length > 0 ? (
+              <Text style={[typography.caption, { color: colors.textSecondary }]}>
+                Avec l&apos;aide de{' '}
+                {pendingCompletion.shared_with_member_ids
+                  .map((mid) => members?.find((m) => m.id === mid)?.first_name)
+                  .filter(Boolean)
+                  .join(', ')}
+                {' '}— les Dones seront partagés.
+              </Text>
+            ) : null}
             <View style={{ flexDirection: 'row', gap: spacing.md }}>
               <Button label="Valider" onPress={() => onValidate(true)} loading={busy} style={{ flex: 1 }} />
               <Button label="Refuser" onPress={() => onValidate(false)} loading={busy} variant="danger" style={{ flex: 1 }} />
@@ -203,6 +225,39 @@ export default function TaskDetailsScreen() {
                 </View>
               </View>
             ) : null}
+            {showHelperPicker && helperCandidates.length > 0 ? (
+              <View style={{ gap: spacing.sm }}>
+                <Text style={[typography.label, { color: colors.textSecondary }]}>Quelqu&apos;un t&apos;a aidé ?</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+                  {helperCandidates.map((m) => {
+                    const selected = sharedWithIds.includes(m.id);
+                    return (
+                      <Pressable
+                        key={m.id}
+                        onPress={() => toggleHelper(m.id)}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: spacing.xs,
+                          paddingVertical: spacing.sm,
+                          paddingHorizontal: spacing.md,
+                          borderRadius: radius.full,
+                          backgroundColor: selected ? colors.primaryMuted : colors.surfaceMuted,
+                        }}
+                      >
+                        <Avatar name={m.first_name} uri={m.avatar_url} size={20} />
+                        <Text style={{ color: selected ? colors.primary : colors.textPrimary }}>{m.first_name}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                {sharedWithIds.length > 0 ? (
+                  <Text style={[typography.caption, { color: colors.textMuted }]}>
+                    Les {task.points} Dones seront partagés entre {sharedWithIds.length + 1} personnes.
+                  </Text>
+                ) : null}
+              </View>
+            ) : null}
             <Button
               label={performerId === myMembership?.id ? "J'ai terminé" : `${performer?.first_name ?? ''} a terminé`.trim()}
               onPress={onComplete}
@@ -223,8 +278,7 @@ export default function TaskDetailsScreen() {
             }}
           />
         ) : null}
-      </View>
-    </Screen>
+    </PopupScreen>
   );
 }
 

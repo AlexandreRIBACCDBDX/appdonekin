@@ -18,6 +18,7 @@ export default function AppLayout() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="quick-add" options={{ presentation: 'transparentModal', animation: 'fade' }} />
         <Stack.Screen name="task/create" options={{ presentation: 'transparentModal', animation: 'fade' }} />
+        <Stack.Screen name="task/[id]" options={{ presentation: 'transparentModal', animation: 'fade' }} />
         <Stack.Screen name="project/create" options={{ presentation: 'transparentModal', animation: 'fade' }} />
       </Stack>
     </ActiveCircleProvider>

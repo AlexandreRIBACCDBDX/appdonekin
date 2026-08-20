@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getUserDetail } from '@/lib/data';
 import { Badge, statusTone } from '@/components/Badge';
 import { UserActions } from '@/components/UserActions';
+import { EditUserNameForm } from '@/components/EditUserNameForm';
 import type { Profile } from '@/types/database';
 
 interface UserDetail {
@@ -27,8 +28,11 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
   let detail: UserDetail;
   try {
     detail = (await getUserDetail(id)) as unknown as UserDetail;
-  } catch {
-    notFound();
+  } catch (err) {
+    if (err instanceof Error && err.message.includes('user_not_found')) {
+      notFound();
+    }
+    throw err;
   }
 
   const { profile, memberships, invitations_sent, tasks_created, recent_admin_actions } = detail!;
@@ -64,6 +68,11 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
 
       <div>
         <UserActions userId={profile.id} status={profile.status} />
+      </div>
+
+      <div>
+        <h2 className="mb-2 text-sm font-semibold text-slate-700">Modifier</h2>
+        <EditUserNameForm userId={profile.id} initialFullName={profile.full_name} />
       </div>
 
       <div>

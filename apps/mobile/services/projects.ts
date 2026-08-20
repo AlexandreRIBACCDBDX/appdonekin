@@ -99,12 +99,21 @@ export async function completeProject(projectId: string): Promise<{ promise_kept
   return data as { promise_kept: boolean };
 }
 
-// Pays Dones from the caller's own personal wallet into the project's pool.
-export async function contributeToProject(projectId: string, amount: number, note?: string | null): Promise<void> {
+// Pays Dones into the project's pool — from the caller's own personal
+// wallet by default, or from a managed dependent's (fromMemberId) if the
+// caller has can_manage_rewards on them (a guardian contributing on behalf
+// of a phone-less child or friend).
+export async function contributeToProject(
+  projectId: string,
+  amount: number,
+  note?: string | null,
+  fromMemberId?: string | null
+): Promise<void> {
   const { error } = await supabase.rpc('contribute_to_project', {
     p_project_id: projectId,
     p_amount: amount,
     p_note: note ?? null,
+    p_from_member_id: fromMemberId ?? null,
   });
   if (error) throw error;
 }

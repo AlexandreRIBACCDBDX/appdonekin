@@ -2,7 +2,9 @@ import { notFound } from 'next/navigation';
 import { getCircleDetail } from '@/lib/data';
 import { Badge } from '@/components/Badge';
 import { CircleActions } from '@/components/CircleActions';
+import { EditCircleForm } from '@/components/EditCircleForm';
 import { AdjustPointsForm } from '@/components/AdjustPointsForm';
+import { AdjustProjectPointsForm } from '@/components/AdjustProjectPointsForm';
 import { InvitationActions } from '@/components/InvitationActions';
 import { TaskChainLookup } from '@/components/TaskChainLookup';
 import type { Circle } from '@/types/database';
@@ -21,9 +23,18 @@ interface CircleMemberDetail {
   balance: number;
 }
 
+interface CircleProjectDetail {
+  id: string;
+  title: string;
+  status: string;
+  target_points: number | null;
+  balance: number;
+}
+
 interface CircleDetail {
   circle: Circle;
   members: CircleMemberDetail[];
+  projects: CircleProjectDetail[];
   projects_count: number;
   tasks_count: number;
   tasks_completed_count: number;
@@ -39,13 +50,17 @@ export default async function CircleDetailPage({ params }: { params: Promise<{ i
   let detail: CircleDetail;
   try {
     detail = (await getCircleDetail(id)) as unknown as CircleDetail;
-  } catch {
-    notFound();
+  } catch (err) {
+    if (err instanceof Error && err.message.includes('circle_not_found')) {
+      notFound();
+    }
+    throw err;
   }
 
   const {
     circle,
     members,
+    projects,
     projects_count,
     tasks_count,
     tasks_completed_count,
@@ -94,7 +109,12 @@ export default async function CircleDetailPage({ params }: { params: Promise<{ i
       </div>
 
       <div>
-        <CircleActions circleId={circle.id} suspended={!!circle.suspended_at} />
+        <CircleActions circleId={circle.id} suspended={!!circle.suspended_at} archived={!!circle.archived_at} />
+      </div>
+
+      <div>
+        <h2 className="mb-2 text-sm font-semibold text-slate-700">Modifier</h2>
+        <EditCircleForm circleId={circle.id} initialName={circle.name} initialType={circle.type} />
       </div>
 
       <div>
@@ -133,6 +153,32 @@ export default async function CircleDetailPage({ params }: { params: Promise<{ i
       <div>
         <h2 className="mb-2 text-sm font-semibold text-slate-700">Ajuster des points (manuel, audité)</h2>
         <AdjustPointsForm circleId={circle.id} members={members.map((m) => ({ id: m.id, first_name: m.first_name }))} />
+      </div>
+
+      {projects.length > 0 ? (
+        <div>
+          <h2 className="mb-2 text-sm font-semibold text-slate-700">Projets</h2>
+          <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white">
+            {projects.map((p) => (
+              <div key={p.id} className="flex items-center justify-between px-4 py-3 text-sm">
+                <div>
+                  <p className="font-medium text-slate-800">{p.title}</p>
+                  <p className="text-xs text-slate-500">{p.status}</p>
+                </div>
+                <p className="text-xs font-medium text-amber-600">
+                  {p.balance} {p.target_points ? `/ ${p.target_points}` : ''} pts
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      <div>
+        <h2 className="mb-2 text-sm font-semibold text-slate-700">
+          Ajuster les points d&apos;un projet (réclamation, correction)
+        </h2>
+        <AdjustProjectPointsForm circleId={circle.id} projects={projects.map((p) => ({ id: p.id, title: p.title }))} />
       </div>
 
       {pending_invitations.length > 0 ? (

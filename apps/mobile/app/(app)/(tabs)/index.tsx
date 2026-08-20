@@ -10,6 +10,7 @@ import { useActiveCircle } from '@/providers/ActiveCircleProvider';
 import { TopChrome } from '@/components/features/TopChrome';
 import { BottomNav } from '@/components/features/BottomNav';
 import { ManagedChildrenBalances } from '@/components/features/ManagedChildrenBalances';
+import { WeeklyLeaderboard } from '@/components/features/WeeklyLeaderboard';
 import { Avatar } from '@/components/ui/Avatar';
 import { Card } from '@/components/ui/Card';
 import { PointsPill } from '@/components/ui/Badge';
@@ -18,7 +19,6 @@ import { DueCountdown } from '@/components/ui/DueCountdown';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { useTasks, usePendingValidations } from '@/hooks/useTasks';
 import { useCircleMembers } from '@/hooks/useMembers';
-import { useCircleWallets } from '@/hooks/useWallet';
 import { useProjects, useProjectTasks, useProjectWallet } from '@/hooks/useProjects';
 import { projectProgress } from '@/services/projects';
 import type { Project } from '@/types/database';
@@ -32,7 +32,6 @@ export default function DashboardScreen() {
   const { data: tasks, isFetching: tasksFetching } = useTasks(circleId);
   const { data: pendingValidations } = usePendingValidations(circleId);
   const { data: members } = useCircleMembers(circleId);
-  const { data: wallets } = useCircleWallets(circleId);
   const { data: projects } = useProjects(circleId);
 
   const myTasks = useMemo(
@@ -42,11 +41,6 @@ export default function DashboardScreen() {
       ),
     [tasks, myMembership]
   );
-
-  // The current user's own balance — not a circle-wide sum, and not
-  // total_earned (a lifetime gross counter): `balance` is the actual net
-  // amount they have to spend right now.
-  const myBalance = wallets?.find((w) => w.member_id === myMembership?.id)?.balance ?? 0;
 
   if (isLoading || !circle) return <LoadingState />;
 
@@ -64,25 +58,27 @@ export default function DashboardScreen() {
       >
         <ManagedChildrenBalances />
 
-        <Card style={{ padding: spacing.xl }}>
-          <Text style={{ color: colors.textSecondary, fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase' }}>
-            Ton solde
-          </Text>
-          <View style={{ marginTop: spacing.xs }}>
-            <DonesAmount
-              value={myBalance}
-              size={24}
-              gap={8}
-              textStyle={{ color: colors.textPrimary, fontSize: 30, fontWeight: '800' }}
-            />
-          </View>
-          <Text style={[typography.body, { color: colors.textSecondary, marginTop: spacing.xs }]}>
-            {myTasks.length} tâche{myTasks.length !== 1 ? 's' : ''} à faire cette semaine
-            {pendingValidations && pendingValidations.length > 0
-              ? ` • ${pendingValidations.length} en attente de validation`
-              : ''}
-          </Text>
-        </Card>
+        {pendingValidations && pendingValidations.length > 0 ? (
+          <Pressable
+            onPress={() => router.push('/(app)/(tabs)/tasks')}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              backgroundColor: colors.primaryMuted,
+              borderRadius: radius.lg,
+              paddingVertical: spacing.md,
+              paddingHorizontal: spacing.lg,
+            }}
+          >
+            <Text style={[typography.body, { color: colors.textPrimary }]}>
+              {pendingValidations.length} tâche{pendingValidations.length !== 1 ? 's' : ''} en attente de validation
+            </Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+          </Pressable>
+        ) : null}
+
+        <WeeklyLeaderboard />
 
       <Section
         title="Mes tâches"

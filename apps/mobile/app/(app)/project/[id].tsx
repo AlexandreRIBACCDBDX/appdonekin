@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Screen } from '@/components/ui/Screen';
+import { PopupScreen } from '@/components/features/PopupScreen';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
+import { Avatar } from '@/components/ui/Avatar';
 import { Badge, PointsPill } from '@/components/ui/Badge';
 import { DonesAmount } from '@/components/ui/DonesAmount';
 import { DonesCoinIcon } from '@/components/ui/DonesCoinIcon';
@@ -25,7 +26,7 @@ import {
   usePromiseVotes,
   useRemoveProjectMember,
 } from '@/hooks/useProjects';
-import { useCircleMembers } from '@/hooks/useMembers';
+import { useCircleMembers, useGuardianRelationships } from '@/hooks/useMembers';
 import { useWallet } from '@/hooks/useWallet';
 import { projectProgress } from '@/services/projects';
 
@@ -38,6 +39,7 @@ export default function ProjectDetailsScreen() {
   const { data: projects } = useProjects(circle?.id ?? null);
   const { data: tasks, isLoading } = useProjectTasks(id ?? null);
   const { data: members } = useCircleMembers(circle?.id ?? null);
+  const { data: guardianRelationships } = useGuardianRelationships(circle?.id ?? null);
   const { data: projectMembers } = useProjectMembers(id ?? null);
   const { data: wallet } = useProjectWallet(id ?? null);
   const { data: promiseVotes } = usePromiseVotes(id ?? null);
@@ -45,12 +47,25 @@ export default function ProjectDetailsScreen() {
   const completeProject = useCompleteProject(circle?.id ?? '');
   const addProjectMember = useAddProjectMember(id ?? '');
   const removeProjectMember = useRemoveProjectMember(id ?? '');
-  const { data: myWallet } = useWallet(myMembership?.id ?? null);
   const contributeToProject = useContributeToProject(circle?.id ?? '');
   const [busy, setBusy] = useState(false);
   const [contributing, setContributing] = useState(false);
   const [contributeAmount, setContributeAmount] = useState('');
+  const [contributeFromId, setContributeFromId] = useState<string | null>(null);
   const project = projects?.find((p) => p.id === id);
+
+  // Phone-less dependents (children/friends) the connected member can
+  // manage rewards for — spending someone else's Dones is the same
+  // authority as redeeming a reward on their behalf, so this mirrors that
+  // permission rather than introducing a new one.
+  const manageableDependents = (guardianRelationships ?? [])
+    .filter((g) => g.guardian_member_id === myMembership?.id && g.can_manage_rewards)
+    .map((g) => members?.find((m) => m.id === g.managed_member_id))
+    .filter((m): m is NonNullable<typeof m> => !!m);
+  const contributeFrom = contributeFromId
+    ? (members?.find((m) => m.id === contributeFromId) ?? null)
+    : null;
+  const { data: contributeFromWallet } = useWallet(contributeFromId ?? myMembership?.id ?? null);
 
   if (isLoading || !project) return <LoadingState />;
 
@@ -109,36 +124,39 @@ export default function ProjectDetailsScreen() {
   };
 
   const parsedContribution = contributeAmount.trim() ? Number(contributeAmount.trim().replace(',', '.')) : null;
-  const myBalance = myWallet?.balance ?? 0;
-  const canAffordContribution = !!parsedContribution && parsedContribution > 0 && parsedContribution <= myBalance;
+  const sourceBalance = contributeFromWallet?.balance ?? 0;
+  const canAffordContribution = !!parsedContribution && parsedContribution > 0 && parsedContribution <= sourceBalance;
 
   const onContribute = async () => {
     if (!parsedContribution) return;
     try {
-      await contributeToProject.mutateAsync({ projectId: project.id, amount: parsedContribution });
+      await contributeToProject.mutateAsync({
+        projectId: project.id,
+        amount: parsedContribution,
+        fromMemberId: contributeFromId ?? myMembership?.id,
+      });
       setContributing(false);
       setContributeAmount('');
+      setContributeFromId(null);
     } catch (err) {
       const message =
         err instanceof Error && err.message === 'insufficient_points'
-          ? "Tu n'as pas assez de Dones dans ton wallet."
+          ? `${contributeFrom ? `${contributeFrom.first_name} n'a` : "Tu n'as"} pas assez de Dones dans ${contributeFrom ? 'son' : 'ton'} wallet.`
           : 'Une erreur est survenue.';
       Alert.alert('Contribution impossible', message);
     }
   };
 
   return (
-    <Screen scroll>
-      <View style={{ gap: spacing.xxl }}>
-        <View style={{ gap: spacing.xs }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-            <Text style={[typography.title, { color: colors.textPrimary }]}>{project.title}</Text>
+    <PopupScreen title={project.title}>
+        {project.status === 'completed' || project.description ? (
+          <View style={{ gap: spacing.xs }}>
             {project.status === 'completed' ? <Badge label="Terminé" tone="success" /> : null}
+            {project.description ? (
+              <Text style={[typography.body, { color: colors.textSecondary }]}>{project.description}</Text>
+            ) : null}
           </View>
-          {project.description ? (
-            <Text style={[typography.body, { color: colors.textSecondary }]}>{project.description}</Text>
-          ) : null}
-        </View>
+        ) : null}
 
         <Card>
           <View
@@ -195,6 +213,38 @@ export default function ProjectDetailsScreen() {
           {project.status !== 'completed' ? (
             contributing ? (
               <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
+                {manageableDependents.length > 0 ? (
+                  <View style={{ gap: spacing.xs }}>
+                    <Text style={[typography.caption, { color: colors.textMuted }]}>Contribuer avec le wallet de</Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+                      {[null, ...manageableDependents.map((m) => m.id)].map((memberId) => {
+                        const selected = contributeFromId === memberId;
+                        const label = memberId === null ? 'Moi' : manageableDependents.find((m) => m.id === memberId)?.first_name ?? '';
+                        const member = memberId === null ? null : manageableDependents.find((m) => m.id === memberId);
+                        return (
+                          <Pressable
+                            key={memberId ?? 'self'}
+                            onPress={() => setContributeFromId(memberId)}
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              gap: spacing.xs,
+                              paddingVertical: spacing.xs,
+                              paddingHorizontal: spacing.sm,
+                              borderRadius: radius.full,
+                              backgroundColor: selected ? colors.primaryMuted : colors.surfaceMuted,
+                            }}
+                          >
+                            {member ? <Avatar name={member.first_name} uri={member.avatar_url} size={20} /> : null}
+                            <Text style={{ color: selected ? colors.primary : colors.textPrimary, fontWeight: '700' }}>
+                              {label}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
+                ) : null}
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
                   {CONTRIBUTE_PRESETS.map((value) => {
                     const selected = parsedContribution === value;
@@ -227,7 +277,8 @@ export default function ProjectDetailsScreen() {
                   placeholder="Ou un autre montant"
                 />
                 <Text style={[typography.caption, { color: colors.textMuted }]}>
-                  Ton wallet : {myBalance} Dones disponibles.
+                  {contributeFrom ? `Wallet de ${contributeFrom.first_name}` : 'Ton wallet'} : {sourceBalance} Dones
+                  disponibles.
                 </Text>
                 <View style={{ flexDirection: 'row', gap: spacing.sm }}>
                   <Button label="Annuler" variant="secondary" onPress={() => setContributing(false)} style={{ flex: 1 }} />
@@ -370,7 +421,6 @@ export default function ProjectDetailsScreen() {
             size="lg"
           />
         ) : null}
-      </View>
-    </Screen>
+    </PopupScreen>
   );
 }

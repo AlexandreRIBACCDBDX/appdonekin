@@ -541,7 +541,7 @@ export type Database = {
       };
       complete_project: { Args: { p_project_id: string }; Returns: Json };
       contribute_to_project: {
-        Args: { p_project_id: string; p_amount: number; p_note?: string | null };
+        Args: { p_project_id: string; p_amount: number; p_note?: string | null; p_from_member_id?: string | null };
         Returns: void;
       };
       complete_task: {
@@ -573,6 +573,10 @@ export type Database = {
         Args: { p_circle_id: string; p_member_id: string; p_amount: number; p_reason?: string | null };
         Returns: void;
       };
+      circle_weekly_leaderboard: {
+        Args: { p_circle_id: string };
+        Returns: { member_id: string; first_name: string; avatar_url: string | null; points_earned: number }[];
+      };
       create_invitation: {
         Args: {
           p_circle_id: string;
@@ -600,6 +604,8 @@ export type Database = {
       admin_get_user_detail: { Args: { p_user_id: string }; Returns: Json };
       admin_suspend_user: { Args: { p_user_id: string; p_reason: string }; Returns: void };
       admin_reactivate_user: { Args: { p_user_id: string; p_reason?: string | null }; Returns: void };
+      admin_update_user: { Args: { p_user_id: string; p_full_name: string }; Returns: void };
+      admin_delete_user: { Args: { p_user_id: string; p_reason: string }; Returns: void };
       admin_list_circles: {
         Args: { p_search?: string | null; p_type?: CircleType | null; p_page?: number; p_page_size?: number };
         Returns: Json;
@@ -607,8 +613,12 @@ export type Database = {
       admin_get_circle_detail: { Args: { p_circle_id: string }; Returns: Json };
       admin_suspend_circle: { Args: { p_circle_id: string; p_reason: string }; Returns: void };
       admin_reactivate_circle: { Args: { p_circle_id: string; p_reason?: string | null }; Returns: void };
+      admin_update_circle: { Args: { p_circle_id: string; p_name: string; p_type?: CircleType | null }; Returns: void };
+      admin_delete_circle: { Args: { p_circle_id: string; p_reason: string }; Returns: void };
+      admin_restore_circle: { Args: { p_circle_id: string; p_reason?: string | null }; Returns: void };
       admin_get_task_completion_chain: { Args: { p_task_id: string }; Returns: Json };
       admin_adjust_points: { Args: { p_member_id: string; p_amount: number; p_reason: string }; Returns: void };
+      admin_adjust_project_points: { Args: { p_project_id: string; p_amount: number; p_reason: string }; Returns: void };
       admin_list_invitations: {
         Args: {
           p_circle_id?: string | null;

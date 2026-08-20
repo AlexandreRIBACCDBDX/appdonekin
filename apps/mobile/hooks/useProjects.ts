@@ -110,8 +110,8 @@ export function useCompleteProject(circleId: string) {
 export function useContributeToProject(circleId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (params: { projectId: string; amount: number; note?: string }) =>
-      contributeToProject(params.projectId, params.amount, params.note),
+    mutationFn: (params: { projectId: string; amount: number; note?: string; fromMemberId?: string }) =>
+      contributeToProject(params.projectId, params.amount, params.note, params.fromMemberId),
     onSuccess: (_data, params) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projectWallet(params.projectId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.projectMembers(params.projectId) });

@@ -33,6 +33,22 @@ export async function getDashboardStats(period: string) {
   return rpc('admin_get_dashboard_stats', { p_period: period });
 }
 
+export interface DashboardTimeseriesPoint {
+  day: string;
+  new_accounts: number;
+  new_circles: number;
+  new_members: number;
+  tasks_created: number;
+  tasks_completed: number;
+  active_users: number;
+  points_redeemed: number;
+  self_task_cap_hits: number;
+}
+
+export async function getDashboardTimeseries(period: string) {
+  return rpc<DashboardTimeseriesPoint[]>('admin_get_dashboard_timeseries', { p_period: period });
+}
+
 export async function globalSearch(query: string) {
   return rpc('admin_global_search', { p_query: query });
 }

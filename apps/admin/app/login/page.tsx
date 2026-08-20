@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { LogoMark } from '@/components/LogoMark';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -46,8 +47,10 @@ export default function LoginPage() {
   return (
     <div className="flex flex-1 items-center justify-center bg-slate-950 px-4">
       <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <div className="mb-3 text-3xl">🤝</div>
+        <div className="mb-8 flex flex-col items-center text-center">
+          <div className="mb-3">
+            <LogoMark size={48} />
+          </div>
           <h1 className="text-xl font-semibold text-white">DoneKin Admin</h1>
           <p className="mt-1 text-sm text-slate-400">Back office — accès réservé</p>
         </div>

@@ -599,6 +599,7 @@ export type Database = {
       is_platform_admin: { Args: Record<string, never>; Returns: boolean };
       get_platform_role: { Args: Record<string, never>; Returns: PlatformRole | null };
       admin_get_dashboard_stats: { Args: { p_period?: string }; Returns: Json };
+      admin_get_dashboard_timeseries: { Args: { p_period?: string }; Returns: Json };
       admin_global_search: { Args: { p_query: string }; Returns: Json };
       admin_list_users: {
         Args: { p_search?: string | null; p_status?: ProfileStatus | null; p_page?: number; p_page_size?: number };

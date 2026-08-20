@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { LogoMark } from '@/components/LogoMark';
 import type { PlatformRole } from '@/types/database';
 
 const NAV = [
@@ -19,8 +20,8 @@ export function Sidebar({ role }: { role: PlatformRole }) {
 
   return (
     <aside className="flex w-60 shrink-0 flex-col bg-slate-950 text-slate-300">
-      <div className="flex items-center gap-2 px-5 py-5">
-        <span className="text-xl">🤝</span>
+      <div className="flex items-center gap-2.5 px-5 py-5">
+        <LogoMark size={28} />
         <span className="text-sm font-semibold text-white">DoneKin Admin</span>
       </div>
       <nav className="flex-1 space-y-0.5 px-3">

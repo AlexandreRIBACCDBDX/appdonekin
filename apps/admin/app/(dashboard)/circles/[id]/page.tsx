@@ -8,7 +8,24 @@ import { AdjustProjectPointsForm } from '@/components/AdjustProjectPointsForm';
 import { RedemptionActions } from '@/components/RedemptionActions';
 import { InvitationActions } from '@/components/InvitationActions';
 import { TaskChainLookup } from '@/components/TaskChainLookup';
+import { BreakdownBarChart } from '@/components/BreakdownBarChart';
+import { ProgressBarList } from '@/components/ProgressBarList';
 import type { Circle } from '@/types/database';
+
+const ACTIVITY_TYPE_LABELS: Record<string, string> = {
+  task_completed: 'Tâche terminée',
+  validation_requested: 'Validation demandée',
+  validation_approved: 'Validation approuvée',
+  validation_rejected: 'Validation refusée',
+  reward_redeemed: 'Récompense utilisée',
+  reward_pending_validation: 'Récompense en attente',
+  member_joined: 'Membre rejoint',
+  points_transferred: 'Points transférés',
+  bonus: 'Bonus',
+  admin_adjustment: 'Ajustement admin',
+  project_payment: 'Contribution projet',
+  project_completed: 'Projet terminé',
+};
 
 interface CircleMemberDetail {
   id: string;
@@ -90,6 +107,17 @@ export default async function CircleDetailPage({ params }: { params: Promise<{ i
     pending_invitations,
     recent_activity,
   } = detail!;
+
+  const memberBalances = members.map((m) => ({ label: m.first_name, value: m.balance }));
+
+  const activityByType = Object.entries(
+    recent_activity.reduce<Record<string, number>>((acc, a) => {
+      acc[a.type] = (acc[a.type] ?? 0) + 1;
+      return acc;
+    }, {})
+  )
+    .map(([type, count]) => ({ label: ACTIVITY_TYPE_LABELS[type] ?? type, value: count }))
+    .sort((a, b) => b.value - a.value);
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -178,6 +206,15 @@ export default async function CircleDetailPage({ params }: { params: Promise<{ i
         </div>
       </div>
 
+      {memberBalances.length > 0 ? (
+        <div>
+          <h2 className="mb-2 text-sm font-semibold text-slate-700">Soldes des membres</h2>
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <BreakdownBarChart data={memberBalances} color="#f59e0b" />
+          </div>
+        </div>
+      ) : null}
+
       <div>
         <h2 className="mb-2 text-sm font-semibold text-slate-700">Ajuster des points (manuel, audité)</h2>
         <AdjustPointsForm circleId={circle.id} members={members.map((m) => ({ id: m.id, first_name: m.first_name }))} />
@@ -198,6 +235,18 @@ export default async function CircleDetailPage({ params }: { params: Promise<{ i
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+      ) : null}
+
+      {projects.length > 0 ? (
+        <div>
+          <h2 className="mb-2 text-sm font-semibold text-slate-700">Progression des projets</h2>
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <ProgressBarList
+              items={projects.map((p) => ({ label: p.title, value: p.balance, target: p.target_points }))}
+              color="#0ea5e9"
+            />
           </div>
         </div>
       ) : null}
@@ -284,6 +333,15 @@ export default async function CircleDetailPage({ params }: { params: Promise<{ i
           )}
         </div>
       </div>
+
+      {activityByType.length > 0 ? (
+        <div>
+          <h2 className="mb-2 text-sm font-semibold text-slate-700">Activité récente par type</h2>
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <BreakdownBarChart data={activityByType} color="#8b5cf6" />
+          </div>
+        </div>
+      ) : null}
 
       <TaskChainLookup />
     </div>

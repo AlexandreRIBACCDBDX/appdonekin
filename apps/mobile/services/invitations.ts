@@ -39,3 +39,9 @@ export async function revokeInvitation(id: string): Promise<void> {
   const { error } = await supabase.rpc('revoke_invitation', { p_invitation_id: id });
   if (error) throw error;
 }
+
+export async function joinCircleByCode(code: string): Promise<CircleMember> {
+  const { data, error } = await supabase.rpc('join_circle_by_code', { p_code: code });
+  if (error) throw error;
+  return data as CircleMember;
+}

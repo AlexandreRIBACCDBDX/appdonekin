@@ -61,6 +61,7 @@ export type Circle = {
   name: string;
   type: CircleType;
   avatar_url: string | null;
+  invite_code: string;
   created_by_user_id: string;
   created_at: string;
   archived_at: string | null;
@@ -589,6 +590,8 @@ export type Database = {
       };
       accept_invitation: { Args: { p_token: string }; Returns: CircleMember };
       revoke_invitation: { Args: { p_invitation_id: string }; Returns: void };
+      join_circle_by_code: { Args: { p_code: string }; Returns: CircleMember };
+      regenerate_circle_invite_code: { Args: { p_circle_id: string }; Returns: string };
       mark_notification_read: { Args: { p_notification_id: string }; Returns: void };
       mark_all_notifications_read: { Args: Record<string, never>; Returns: void };
 
@@ -619,6 +622,7 @@ export type Database = {
       admin_get_task_completion_chain: { Args: { p_task_id: string }; Returns: Json };
       admin_adjust_points: { Args: { p_member_id: string; p_amount: number; p_reason: string }; Returns: void };
       admin_adjust_project_points: { Args: { p_project_id: string; p_amount: number; p_reason: string }; Returns: void };
+      admin_cancel_redemption: { Args: { p_redemption_id: string; p_reason: string }; Returns: void };
       admin_list_invitations: {
         Args: {
           p_circle_id?: string | null;

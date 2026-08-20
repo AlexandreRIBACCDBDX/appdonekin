@@ -5,21 +5,38 @@ import { Screen } from '@/components/ui/Screen';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
 import { useTheme } from '@/hooks/useTheme';
-import { useAcceptInvitation } from '@/hooks/useInvitations';
+import { useAcceptInvitation, useJoinCircleByCode } from '@/hooks/useInvitations';
 
 export default function JoinCircleScreen() {
   const { colors, spacing, typography } = useTheme();
   const [token, setToken] = useState('');
   const [error, setError] = useState<string | null>(null);
   const acceptInvitation = useAcceptInvitation();
+  const joinByCode = useJoinCircleByCode();
 
+  // One field handles both: DoneKin's short permanent circle code (e.g.
+  // "8Q2-K7M4") and the older long, single-use invitation token/link. Try
+  // the short code first — it's the common case — and fall back to the
+  // token only if that specific code doesn't exist, so a genuinely invalid
+  // token still surfaces its own error instead of always saying "invalid
+  // code".
   const onSubmit = async () => {
     setError(null);
+    const value = token.trim();
     try {
-      await acceptInvitation.mutateAsync(token.trim());
+      await joinByCode.mutateAsync(value);
       router.replace('/(app)/(tabs)');
-    } catch (err) {
-      setError("Ce code d'invitation n'est pas valide ou a expiré.");
+    } catch (codeErr) {
+      if (codeErr instanceof Error && codeErr.message.includes('invalid_code')) {
+        try {
+          await acceptInvitation.mutateAsync(value);
+          router.replace('/(app)/(tabs)');
+          return;
+        } catch {
+          // fall through to the shared error message below
+        }
+      }
+      setError("Ce code ou lien d'invitation n'est pas valide ou a expiré.");
     }
   };
 
@@ -38,11 +55,17 @@ export default function JoinCircleScreen() {
           value={token}
           onChangeText={setToken}
           autoCapitalize="none"
-          placeholder="Ex : 4f2a9c..."
+          placeholder="Ex : 8Q2-K7M4"
           error={error}
         />
 
-        <Button label="Rejoindre" onPress={onSubmit} loading={acceptInvitation.isPending} disabled={!token.trim()} size="lg" />
+        <Button
+          label="Rejoindre"
+          onPress={onSubmit}
+          loading={joinByCode.isPending || acceptInvitation.isPending}
+          disabled={!token.trim()}
+          size="lg"
+        />
       </View>
     </Screen>
   );

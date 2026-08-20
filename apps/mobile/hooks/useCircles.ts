@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
-import { createCircle, fetchMyCircles, fetchMyMembershipForCircle } from '@/services/circles';
+import { createCircle, fetchMyCircles, fetchMyMembershipForCircle, regenerateInviteCode } from '@/services/circles';
 import type { CircleType } from '@/types/database';
 
 export function useMyCircles() {
@@ -22,5 +22,13 @@ export function useCreateCircle() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.circles });
     },
+  });
+}
+
+export function useRegenerateInviteCode() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (circleId: string) => regenerateInviteCode(circleId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.circles }),
   });
 }

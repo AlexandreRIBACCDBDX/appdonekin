@@ -84,7 +84,7 @@ export default function RewardDetailsScreen() {
           label={reward.requires_validation ? 'Demander à utiliser' : 'Utiliser maintenant'}
           onPress={onRedeem}
           loading={redeemReward.isPending}
-          disabled={!redeemFor || (redeemFor === myMembership?.id && (myWallet?.balance ?? 0) < reward.cost_points)}
+          disabled={!redeemFor || (redeemFor === myMembership?.id && Number(myWallet?.balance ?? 0) < reward.cost_points)}
           size="lg"
         />
 

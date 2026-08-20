@@ -8,6 +8,7 @@ import { BottomNav } from '@/components/features/BottomNav';
 import { Card } from '@/components/ui/Card';
 import { DonesAmount } from '@/components/ui/DonesAmount';
 import { EditableAvatar } from '@/components/features/EditableAvatar';
+import { InviteCodeCard } from '@/components/features/InviteCodeCard';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/providers/AuthProvider';
 import { useActiveCircle } from '@/providers/ActiveCircleProvider';
@@ -23,7 +24,8 @@ const LINKS = [
 export default function ProfileScreen() {
   const { colors, spacing, radius, typography, gradients } = useTheme();
   const { profile, signOut } = useAuth();
-  const { myMembership } = useActiveCircle();
+  const { circle, myMembership } = useActiveCircle();
+  const canManageCircle = myMembership?.role === 'owner' || myMembership?.role === 'admin';
   const { data: wallet } = useWallet(myMembership?.id ?? null);
 
   return (
@@ -64,6 +66,10 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        {circle ? (
+          <InviteCodeCard circleId={circle.id} code={circle.invite_code} canManage={canManageCircle} />
+        ) : null}
+
         <View style={{ gap: spacing.sm }}>
           {LINKS.map((link) => (
             <Pressable
@@ -83,6 +89,25 @@ export default function ProfileScreen() {
               <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </Pressable>
           ))}
+        </View>
+
+        <View style={{ gap: spacing.sm }}>
+          <Text style={[typography.label, { color: colors.textSecondary }]}>Explication de DoneKin</Text>
+          <Pressable
+            onPress={() => router.push('/guide')}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: spacing.md,
+              padding: spacing.lg,
+              borderRadius: radius.md,
+              backgroundColor: colors.surfaceMuted,
+            }}
+          >
+            <Ionicons name="information-circle-outline" size={22} color={colors.textPrimary} />
+            <Text style={[typography.body, { flex: 1, color: colors.textPrimary }]}>Comment fonctionne DoneKin</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+          </Pressable>
         </View>
 
         <Card onPress={signOut}>

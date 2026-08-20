@@ -1,10 +1,11 @@
 import { notFound } from 'next/navigation';
 import { getCircleDetail } from '@/lib/data';
-import { Badge } from '@/components/Badge';
+import { Badge, statusTone } from '@/components/Badge';
 import { CircleActions } from '@/components/CircleActions';
 import { EditCircleForm } from '@/components/EditCircleForm';
 import { AdjustPointsForm } from '@/components/AdjustPointsForm';
 import { AdjustProjectPointsForm } from '@/components/AdjustProjectPointsForm';
+import { RedemptionActions } from '@/components/RedemptionActions';
 import { InvitationActions } from '@/components/InvitationActions';
 import { TaskChainLookup } from '@/components/TaskChainLookup';
 import type { Circle } from '@/types/database';
@@ -21,6 +22,7 @@ interface CircleMemberDetail {
   linked_email: string | null;
   guardians: { member_id: string; first_name: string }[];
   balance: number;
+  self_task_cap_hits_7d: number;
 }
 
 interface CircleProjectDetail {
@@ -31,10 +33,28 @@ interface CircleProjectDetail {
   balance: number;
 }
 
+interface CircleRewardDetail {
+  id: string;
+  name: string;
+  cost_points: number;
+  is_active: boolean;
+}
+
+interface CircleRedemptionDetail {
+  id: string;
+  reward_name: string;
+  member_name: string;
+  status: string;
+  points_spent: number;
+  created_at: string;
+}
+
 interface CircleDetail {
   circle: Circle;
   members: CircleMemberDetail[];
   projects: CircleProjectDetail[];
+  rewards: CircleRewardDetail[];
+  redemptions: CircleRedemptionDetail[];
   projects_count: number;
   tasks_count: number;
   tasks_completed_count: number;
@@ -61,6 +81,8 @@ export default async function CircleDetailPage({ params }: { params: Promise<{ i
     circle,
     members,
     projects,
+    rewards,
+    redemptions,
     projects_count,
     tasks_count,
     tasks_completed_count,
@@ -144,6 +166,12 @@ export default async function CircleDetailPage({ params }: { params: Promise<{ i
                   </div>
                 )}
                 <p className="mt-1 text-xs font-medium text-amber-600">{m.balance} pts</p>
+                {m.self_task_cap_hits_7d > 0 ? (
+                  <p className="mt-1 text-xs text-orange-600">
+                    ⚠ {m.self_task_cap_hits_7d} tâche{m.self_task_cap_hits_7d > 1 ? 's' : ''} perso plafonnée
+                    {m.self_task_cap_hits_7d > 1 ? 's' : ''} (7j)
+                  </p>
+                ) : null}
               </div>
             </div>
           ))}
@@ -180,6 +208,49 @@ export default async function CircleDetailPage({ params }: { params: Promise<{ i
         </h2>
         <AdjustProjectPointsForm circleId={circle.id} projects={projects.map((p) => ({ id: p.id, title: p.title }))} />
       </div>
+
+      {rewards.length > 0 ? (
+        <div>
+          <h2 className="mb-2 text-sm font-semibold text-slate-700">Récompenses</h2>
+          <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white">
+            {rewards.map((r) => (
+              <div key={r.id} className="flex items-center justify-between px-4 py-3 text-sm">
+                <p className="font-medium text-slate-800">{r.name}</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-amber-600">{r.cost_points} pts</span>
+                  <Badge label={r.is_active ? 'Active' : 'Désactivée'} tone={r.is_active ? 'success' : 'neutral'} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {redemptions.length > 0 ? (
+        <div>
+          <h2 className="mb-2 text-sm font-semibold text-slate-700">Rédemptions récentes</h2>
+          <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white">
+            {redemptions.map((rd) => (
+              <div key={rd.id} className="flex items-center justify-between px-4 py-3 text-sm">
+                <div>
+                  <p className="font-medium text-slate-800">
+                    {rd.member_name} → {rd.reward_name}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {rd.points_spent} pts • {new Date(rd.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge label={rd.status} tone={statusTone(rd.status)} />
+                  {rd.status === 'approved' ? (
+                    <RedemptionActions redemptionId={rd.id} circleId={circle.id} />
+                  ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {pending_invitations.length > 0 ? (
         <div>

@@ -8,6 +8,9 @@ interface SearchResults {
   users: { id: string; full_name: string; email: string | null }[];
   members: { id: string; first_name: string; circle_id: string; circle_name: string; access_mode: string }[];
   circles: { id: string; name: string; type: string }[];
+  projects: { id: string; title: string; circle_id: string }[];
+  tasks: { id: string; title: string; circle_id: string }[];
+  rewards: { id: string; name: string; circle_id: string }[];
 }
 
 export function SearchBox() {
@@ -43,7 +46,13 @@ export function SearchBox() {
   };
 
   const hasResults =
-    results && (results.users.length > 0 || results.members.length > 0 || results.circles.length > 0);
+    results &&
+    (results.users.length > 0 ||
+      results.members.length > 0 ||
+      results.circles.length > 0 ||
+      results.projects.length > 0 ||
+      results.tasks.length > 0 ||
+      results.rewards.length > 0);
 
   return (
     <div ref={containerRef} className="relative w-full max-w-md">
@@ -91,7 +100,7 @@ export function SearchBox() {
             </div>
           ) : null}
           {results!.members.length > 0 ? (
-            <div>
+            <div className="mb-2">
               <p className="px-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Membres</p>
               {results!.members.map((m) => (
                 <button
@@ -103,6 +112,48 @@ export function SearchBox() {
                   <span className="ml-2 text-slate-400">
                     {m.circle_name} • {m.access_mode === 'guardian_managed' ? 'Profil géré' : 'Compte personnel'}
                   </span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+          {results!.projects.length > 0 ? (
+            <div className="mb-2">
+              <p className="px-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Projets</p>
+              {results!.projects.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => goTo(`/circles/${p.circle_id}`)}
+                  className="block w-full rounded-md px-2 py-1.5 text-left text-sm hover:bg-slate-50"
+                >
+                  <span className="font-medium text-slate-800">{p.title}</span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+          {results!.tasks.length > 0 ? (
+            <div className="mb-2">
+              <p className="px-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Tâches</p>
+              {results!.tasks.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => goTo(`/circles/${t.circle_id}`)}
+                  className="block w-full rounded-md px-2 py-1.5 text-left text-sm hover:bg-slate-50"
+                >
+                  <span className="font-medium text-slate-800">{t.title}</span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+          {results!.rewards.length > 0 ? (
+            <div>
+              <p className="px-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Récompenses</p>
+              {results!.rewards.map((r) => (
+                <button
+                  key={r.id}
+                  onClick={() => goTo(`/circles/${r.circle_id}`)}
+                  className="block w-full rounded-md px-2 py-1.5 text-left text-sm hover:bg-slate-50"
+                >
+                  <span className="font-medium text-slate-800">{r.name}</span>
                 </button>
               ))}
             </div>

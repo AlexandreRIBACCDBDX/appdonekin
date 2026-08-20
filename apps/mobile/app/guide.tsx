@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { View, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { PopupScreen } from '@/components/features/PopupScreen';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -20,11 +21,20 @@ export default function GuideScreen() {
           passe ensuite dépend d'une seule question : pour qui est-elle créée ?
         </P>
         <H4>Une tâche pour toi-même</H4>
+        <FlowRow steps={['Créée pour toi', 'Marquée faite', '+0,5 Done']} highlightIndex={2} />
         <P>
           Elle vaut automatiquement 0,5 Done — le montant choisi à la création n'est pas retenu. Elle se valide
           toute seule dès que tu la marques faite : personne d'autre n'a besoin de confirmer.
         </P>
+        <Callout>
+          Anti-abus : au-delà de 3 Dones gagnés dans la journée grâce à des tâches perso (soit 6 tâches), les
+          suivantes se marquent bien comme faites mais ne rapportent plus de Dones ce jour-là.
+        </Callout>
         <H4>Une tâche pour quelqu'un d'autre</H4>
+        <FlowRow
+          steps={['Créée pour un tiers', 'Réalisée', 'Validée par le créateur', 'Dones crédités']}
+          highlightIndex={2}
+        />
         <P>
           Là, tu choisis librement combien elle vaut. Mais elle ne paie qu'une fois que la personne qui l'a créée
           confirme qu'elle est bien faite — jamais automatiquement, même pour un admin du cercle.
@@ -47,6 +57,7 @@ export default function GuideScreen() {
           personne en particulier — ils remplissent une cagnotte commune, que deux mécanismes peuvent alimenter en
           même temps.
         </P>
+        <FunnelDiagram />
         <H4>Automatiquement, par les tâches</H4>
         <P>
           Si une tâche est rattachée à un projet, ses Dones ne vont jamais dans le portefeuille de celui qui l'a
@@ -55,7 +66,8 @@ export default function GuideScreen() {
         <H4>Volontairement, avec son propre wallet</H4>
         <P>
           N'importe quel membre du cercle peut aussi payer de sa poche : depuis la fiche du projet, « Contribuer
-          avec mon wallet » retire des Dones de son solde personnel pour les ajouter à la cagnotte.
+          avec mon wallet » retire des Dones de son solde personnel pour les ajouter à la cagnotte. Un parent peut
+          aussi payer avec le wallet d'un enfant ou ami qu'il gère (sans téléphone), à sa place.
         </P>
       </Section>
 
@@ -89,6 +101,14 @@ export default function GuideScreen() {
         <P>
           Partager des points transfère des Dones du solde d'un membre vers celui d'un autre, directement — utile
           pour dire merci sans créer de tâche.
+        </P>
+      </Section>
+
+      <Section eyebrow="Se challenger" title="Un classement, jamais un palmarès des perdants">
+        <P>
+          L'accueil affiche un podium de qui a gagné le plus de Dones depuis lundi — remis à zéro chaque semaine.
+          C'est volontairement un classement « doux » : seul le top 3 apparaît en entier. Si tu n'y es pas, tu ne
+          vois que ta propre place, jamais un classement complet qui mettrait quelqu'un en dernier.
         </P>
       </Section>
 
@@ -160,6 +180,82 @@ function Concept({ label, value, full }: { label: string; value: string; full?: 
         {label}
       </Text>
       <Text style={[typography.caption, { color: colors.textPrimary, fontWeight: '700' }]}>{value}</Text>
+    </View>
+  );
+}
+
+function FlowRow({ steps, highlightIndex }: { steps: string[]; highlightIndex?: number }) {
+  const { colors, spacing, radius, typography } = useTheme();
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+      {steps.map((step, i) => (
+        <View key={step} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <View
+            style={{
+              backgroundColor: highlightIndex === i ? colors.primaryMuted : colors.surfaceMuted,
+              borderWidth: 1,
+              borderColor: highlightIndex === i ? colors.primary : colors.border,
+              borderRadius: radius.sm,
+              paddingVertical: 6,
+              paddingHorizontal: 10,
+            }}
+          >
+            <Text
+              style={[
+                typography.caption,
+                { color: highlightIndex === i ? colors.primary : colors.textPrimary, fontWeight: '700' },
+              ]}
+            >
+              {step}
+            </Text>
+          </View>
+          {i < steps.length - 1 ? <Ionicons name="arrow-forward" size={14} color={colors.textMuted} /> : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function FunnelDiagram() {
+  const { colors, spacing, radius, typography } = useTheme();
+  const Box = ({ label }: { label: string }) => (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.surfaceMuted,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: radius.sm,
+        padding: spacing.sm,
+        alignItems: 'center',
+      }}
+    >
+      <Text style={[typography.caption, { color: colors.textPrimary, fontWeight: '700', textAlign: 'center' }]}>
+        {label}
+      </Text>
+    </View>
+  );
+
+  return (
+    <View style={{ gap: 4, alignItems: 'center' }}>
+      <View style={{ flexDirection: 'row', gap: spacing.sm, alignSelf: 'stretch' }}>
+        <Box label="Tâches du projet" />
+        <Box label="Contributions wallet" />
+      </View>
+      <Ionicons name="arrow-down" size={16} color={colors.textMuted} />
+      <View
+        style={{
+          backgroundColor: colors.donesMuted,
+          borderWidth: 1,
+          borderColor: colors.dones,
+          borderRadius: radius.sm,
+          padding: spacing.sm,
+          alignSelf: 'stretch',
+          alignItems: 'center',
+        }}
+      >
+        <Text style={[typography.caption, { color: colors.dones, fontWeight: '800' }]}>Cagnotte du projet</Text>
+      </View>
     </View>
   );
 }

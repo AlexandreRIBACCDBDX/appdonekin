@@ -75,6 +75,11 @@ export async function adjustProjectPoints(projectId: string, amount: number, rea
   revalidatePath(`/circles/${circleId}`);
 }
 
+export async function cancelRedemption(redemptionId: string, reason: string, circleId: string) {
+  await callRpc('admin_cancel_redemption', { p_redemption_id: redemptionId, p_reason: reason });
+  revalidatePath(`/circles/${circleId}`);
+}
+
 export async function revokeInvitation(invitationId: string, reason?: string) {
   await callRpc('admin_revoke_invitation', { p_invitation_id: invitationId, p_reason: reason ?? null });
   revalidatePath('/invitations');

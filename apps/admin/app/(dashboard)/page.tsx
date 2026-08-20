@@ -57,6 +57,7 @@ export default async function DashboardPage({
           <StatCard label="Tâches créées" value={stats.tasks_created_period ?? 0} />
           <StatCard label="Tâches terminées" value={stats.tasks_completed_period ?? 0} />
           <StatCard label="Points dépensés en récompenses" value={stats.points_redeemed_period ?? 0} />
+          <StatCard label="Tâches perso plafonnées (anti-abus)" value={stats.self_task_cap_hits_period ?? 0} />
         </div>
       </div>
 

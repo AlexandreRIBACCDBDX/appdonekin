@@ -81,8 +81,12 @@ export default function ProjectDetailsScreen() {
   const confirmedCount = promiseVotes?.filter((v) => v.confirmed).length ?? 0;
   const deniedCount = promiseVotes?.filter((v) => !v.confirmed).length ?? 0;
 
-  const poolBalance = wallet?.balance ?? 0;
-  const targetPoints = project.target_points;
+  // wallet.balance and target_points are Postgres `numeric` columns, which
+  // supabase-js returns as strings (to avoid float precision loss) — coerce
+  // to real numbers before comparing, or ">=" silently does a lexicographic
+  // string comparison ("100.0" >= "20.0" is false) instead of a numeric one.
+  const poolBalance = Number(wallet?.balance ?? 0);
+  const targetPoints = project.target_points != null ? Number(project.target_points) : null;
   const targetReached = targetPoints == null || poolBalance >= targetPoints;
   const targetPercent = targetPoints ? Math.min(100, Math.round((poolBalance / targetPoints) * 100)) : 0;
 

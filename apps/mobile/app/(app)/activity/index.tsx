@@ -1,5 +1,5 @@
-import { FlatList, Text, View } from 'react-native';
-import { Screen } from '@/components/ui/Screen';
+import { Text, View } from 'react-native';
+import { PopupScreen } from '@/components/features/PopupScreen';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { LoadingState } from '@/components/ui/LoadingState';
@@ -18,26 +18,23 @@ export default function ActivityScreen() {
   if (isLoading) return <LoadingState />;
 
   return (
-    <Screen padded={false}>
-      <View style={{ padding: spacing.xl }}>
-        <Text style={[typography.title, { color: colors.textPrimary }]}>Activité</Text>
-      </View>
-      <FlatList
-        data={activity ?? []}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: spacing.xl, gap: spacing.sm }}
-        ListEmptyComponent={<EmptyState emoji="📣" title="Aucune activité pour l'instant" />}
-        renderItem={({ item }) => (
-          <Card>
-            <Text style={[typography.body, { color: colors.textPrimary }]}>
-              {describeActivityEvent(item, members ?? [])}
-            </Text>
-            <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>
-              {new Date(item.created_at).toLocaleString()}
-            </Text>
-          </Card>
-        )}
-      />
-    </Screen>
+    <PopupScreen title="Activité">
+      {(activity ?? []).length === 0 ? (
+        <EmptyState emoji="📣" title="Aucune activité pour l'instant" />
+      ) : (
+        <View style={{ gap: spacing.sm }}>
+          {(activity ?? []).map((item) => (
+            <Card key={item.id}>
+              <Text style={[typography.body, { color: colors.textPrimary }]}>
+                {describeActivityEvent(item, members ?? [])}
+              </Text>
+              <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>
+                {new Date(item.created_at).toLocaleString()}
+              </Text>
+            </Card>
+          ))}
+        </View>
+      )}
+    </PopupScreen>
   );
 }

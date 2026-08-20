@@ -1,6 +1,6 @@
-import { FlatList, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { Screen } from '@/components/ui/Screen';
+import { PopupScreen } from '@/components/features/PopupScreen';
 import { Card } from '@/components/ui/Card';
 import { PointsPill } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -34,29 +34,27 @@ export default function WalletHistoryScreen() {
   if (isLoading) return <LoadingState />;
 
   return (
-    <Screen padded={false}>
-      <View style={{ padding: spacing.xl }}>
-        <Text style={[typography.title, { color: colors.textPrimary }]}>Historique</Text>
-      </View>
-      <FlatList
-        data={history ?? []}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: spacing.xl, gap: spacing.sm }}
-        ListEmptyComponent={<EmptyState emoji="📜" title="Aucune transaction" />}
-        renderItem={({ item }) => (
-          <Card>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <View style={{ gap: 2 }}>
-                <Text style={[typography.body, { color: colors.textPrimary }]}>{TYPE_LABELS[item.type]}</Text>
-                <Text style={[typography.caption, { color: colors.textMuted }]}>
-                  {new Date(item.created_at).toLocaleDateString()} à {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </Text>
+    <PopupScreen title="Historique">
+      {(history ?? []).length === 0 ? (
+        <EmptyState emoji="📜" title="Aucune transaction" />
+      ) : (
+        <View style={{ gap: spacing.sm }}>
+          {(history ?? []).map((item) => (
+            <Card key={item.id}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <View style={{ gap: 2 }}>
+                  <Text style={[typography.body, { color: colors.textPrimary }]}>{TYPE_LABELS[item.type]}</Text>
+                  <Text style={[typography.caption, { color: colors.textMuted }]}>
+                    {new Date(item.created_at).toLocaleDateString()} à{' '}
+                    {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                </View>
+                <PointsPill points={item.amount} />
               </View>
-              <PointsPill points={item.amount} />
-            </View>
-          </Card>
-        )}
-      />
-    </Screen>
+            </Card>
+          ))}
+        </View>
+      )}
+    </PopupScreen>
   );
 }

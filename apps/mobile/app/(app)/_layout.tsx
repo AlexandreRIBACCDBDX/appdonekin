@@ -21,6 +21,10 @@ export default function AppLayout() {
         <Stack.Screen name="task/[id]" options={{ presentation: 'transparentModal', animation: 'fade' }} />
         <Stack.Screen name="project/create" options={{ presentation: 'transparentModal', animation: 'fade' }} />
         <Stack.Screen name="project/[id]" options={{ presentation: 'transparentModal', animation: 'fade' }} />
+        <Stack.Screen name="wallet/history" options={{ presentation: 'transparentModal', animation: 'fade' }} />
+        <Stack.Screen name="circle/members" options={{ presentation: 'transparentModal', animation: 'fade' }} />
+        <Stack.Screen name="rewards" options={{ presentation: 'transparentModal', animation: 'fade' }} />
+        <Stack.Screen name="activity" options={{ presentation: 'transparentModal', animation: 'fade' }} />
       </Stack>
     </ActiveCircleProvider>
   );

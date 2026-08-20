@@ -113,24 +113,6 @@ export default function DashboardScreen() {
               </Text>
             </Pressable>
           ))}
-          <Pressable
-            onPress={() => router.push('/(app)/circle/add-member')}
-            style={{ alignItems: 'center', gap: spacing.xs, width: 64 }}
-          >
-            <View
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 22,
-                backgroundColor: colors.surfaceMuted,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Ionicons name="add" size={22} color={colors.textSecondary} />
-            </View>
-            <Text style={[typography.caption, { color: colors.textSecondary }]}>Ajouter</Text>
-          </Pressable>
         </View>
       </Section>
 

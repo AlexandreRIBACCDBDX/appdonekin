@@ -11,7 +11,7 @@ import { TopChrome } from '@/components/features/TopChrome';
 import { BottomNav } from '@/components/features/BottomNav';
 import { ManagedChildrenBalances } from '@/components/features/ManagedChildrenBalances';
 import { WeeklyLeaderboard } from '@/components/features/WeeklyLeaderboard';
-import { WeeklyChallengeCard } from '@/components/features/WeeklyChallengeCard';
+import { WeeklyChallengePopup } from '@/components/features/WeeklyChallengePopup';
 import { Card } from '@/components/ui/Card';
 import { PointsPill } from '@/components/ui/Badge';
 import { DonesAmount } from '@/components/ui/DonesAmount';
@@ -76,7 +76,7 @@ export default function DashboardScreen() {
           </Pressable>
         ) : null}
 
-        <WeeklyChallengeCard />
+        <WeeklyChallengePopup />
 
         <WeeklyLeaderboard />
 

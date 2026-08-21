@@ -7,6 +7,8 @@ import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { queryClient } from '@/lib/queryClient';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
+import { useMaintenanceMode } from '@/hooks/useFeatureFlags';
+import { MaintenanceScreen } from '@/components/features/MaintenanceScreen';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -26,12 +28,22 @@ export default function RootLayout() {
 
 function RootNavigator() {
   const { isLoading } = useAuth();
+  const { data: maintenanceOn } = useMaintenanceMode();
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading || maintenanceOn) {
       SplashScreen.hideAsync().catch(() => {});
     }
-  }, [isLoading]);
+  }, [isLoading, maintenanceOn]);
+
+  if (maintenanceOn) {
+    return (
+      <>
+        <StatusBar style="light" />
+        <MaintenanceScreen />
+      </>
+    );
+  }
 
   if (isLoading) return null;
 

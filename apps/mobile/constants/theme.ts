@@ -1,10 +1,11 @@
 // DoneKin design tokens.
 //
-// Direction: dark, gradient-accented — a single deliberate night look (no
-// light counterpart). Backgrounds sit near-black with a violet cast; a
-// blue → purple → pink gradient (`gradients.primary`) carries primary
-// actions and highlights. Gold stays reserved for Dones, the in-app
-// currency, unchanged from the previous ember/gold direction.
+// Direction: "Ciel & Lavande" — a light, airy ground (no dark counterpart)
+// with the same blue → violet → pink gradient (`gradients.primary`) the
+// Orbit mark already used, now carrying primary actions and highlights on
+// white/sky surfaces instead of near-black ones. Gold stays reserved for
+// Dones, the in-app currency, unchanged across every direction this app
+// has had so far.
 //
 // Rectangular vs. rounded is still a deliberate vocabulary: editable fields
 // use `radius.field` (a real border, just gently rounded) so they read as
@@ -56,25 +57,40 @@ export const palette = {
 
   flame500: '#FF7A45',
 
+  // "Ciel & Lavande" — light palette. Same blue→violet→pink gradient as the
+  // Orbit mark, just on a light ground instead of near-black.
+  skyBg: '#F5F7FF',
+  skyMuted: '#EEF1FC',
+  skyBorder: '#E4E9FB',
+  blueMuted: 'rgba(79,107,251,0.12)',
+
+  navy900: '#1E2233',
+  navy500: '#6B7290',
+  navy300: '#9CA2C0',
+
   // Tinted-pill pairs for 3-tier urgency badges (DueCountdown): plenty of
   // time reuses violetMuted/lavender above; these cover the other two tiers.
   goldMuted: 'rgba(245,166,35,0.16)',
   redMuted: 'rgba(220,38,38,0.16)',
 } as const;
 
-export const lightColors = {
-  background: palette.ink50,
+// "Ciel & Lavande" — the app's one deliberate look (see the header comment
+// above): a light, airy ground with the same blue→violet gradient the
+// Orbit mark already used on dark. Kept as a single flat palette rather
+// than light/dark variants — useTheme() doesn't branch on system scheme.
+export const appColors = {
+  background: palette.skyBg,
   surface: palette.white,
-  surfaceMuted: palette.ink100,
-  border: palette.ink200,
+  surfaceMuted: palette.skyMuted,
+  border: palette.skyBorder,
 
-  textPrimary: palette.ink900,
-  textSecondary: palette.ink500,
-  textMuted: palette.ink400,
+  textPrimary: palette.navy900,
+  textSecondary: palette.navy500,
+  textMuted: palette.navy300,
   textOnPrimary: palette.white,
 
-  primary: palette.ember500,
-  primaryMuted: palette.ember100,
+  primary: palette.blue500,
+  primaryMuted: palette.blueMuted,
 
   dones: palette.gold500,
   donesMuted: palette.gold100,
@@ -85,30 +101,7 @@ export const lightColors = {
   dangerMuted: palette.red100,
 };
 
-export const darkColors = {
-  background: palette.night900,
-  surface: palette.night800,
-  surfaceMuted: palette.night700,
-  border: palette.nightBorder,
-
-  textPrimary: palette.white,
-  textSecondary: palette.mist300,
-  textMuted: palette.mist500,
-  textOnPrimary: palette.white,
-
-  primary: palette.violet500,
-  primaryMuted: palette.violetMuted,
-
-  dones: palette.gold500,
-  donesMuted: palette.goldMuted,
-
-  success: palette.green600,
-  successMuted: palette.night700,
-  danger: palette.red600,
-  dangerMuted: palette.night700,
-};
-
-export type ThemeColors = typeof lightColors;
+export type ThemeColors = typeof appColors;
 
 // Gradient stops for LinearGradient — the app's one accent gradient.
 export const gradients = {

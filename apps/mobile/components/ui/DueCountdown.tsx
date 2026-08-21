@@ -44,7 +44,7 @@ export function DueCountdown({ dueDate }: DueCountdownProps) {
     ? { bg: palette.redMuted, fg: palette.red600, icon: 'alert-circle' as const }
     : urgent
       ? { bg: palette.goldMuted, fg: palette.gold500, icon: 'time-outline' as const }
-      : { bg: palette.violetMuted, fg: palette.lavender, icon: 'time-outline' as const };
+      : { bg: palette.violetMuted, fg: palette.violet500, icon: 'time-outline' as const };
 
   return (
     <View

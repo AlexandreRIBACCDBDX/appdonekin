@@ -1,7 +1,7 @@
-import { darkColors, gradients, radius, shadow, spacing, typography } from '@/constants/theme';
+import { appColors, gradients, radius, shadow, spacing, typography } from '@/constants/theme';
 
-// One deliberate dark, gradient-accented look — no light counterpart, so this
-// no longer branches on the system color scheme.
+// One deliberate light, gradient-accented look ("Ciel & Lavande") — no dark
+// counterpart, so this doesn't branch on the system color scheme.
 export function useTheme() {
-  return { colors: darkColors, spacing, radius, typography, shadow, gradients, scheme: 'dark' as const };
+  return { colors: appColors, spacing, radius, typography, shadow, gradients, scheme: 'light' as const };
 }

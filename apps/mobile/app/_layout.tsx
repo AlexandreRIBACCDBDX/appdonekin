@@ -39,7 +39,7 @@ function RootNavigator() {
   if (maintenanceOn) {
     return (
       <>
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
         <MaintenanceScreen />
       </>
     );

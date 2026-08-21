@@ -129,7 +129,7 @@ function PodiumSlot({
             borderColor: colors.surface,
           }}
         >
-          <Text style={{ fontSize: 11, fontWeight: '800', color: colors.background }}>{rank}</Text>
+          <Text style={{ fontSize: 11, fontWeight: '800', color: palette.navy900 }}>{rank}</Text>
         </View>
       </View>
       <Text numberOfLines={1} style={[typography.caption, { color: colors.textPrimary, fontWeight: isMe ? '800' : '600' }]}>

@@ -11,6 +11,7 @@ import { TopChrome } from '@/components/features/TopChrome';
 import { BottomNav } from '@/components/features/BottomNav';
 import { ManagedChildrenBalances } from '@/components/features/ManagedChildrenBalances';
 import { WeeklyLeaderboard } from '@/components/features/WeeklyLeaderboard';
+import { WeeklyChallengeCard } from '@/components/features/WeeklyChallengeCard';
 import { Card } from '@/components/ui/Card';
 import { PointsPill } from '@/components/ui/Badge';
 import { DonesAmount } from '@/components/ui/DonesAmount';
@@ -74,6 +75,8 @@ export default function DashboardScreen() {
             <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </Pressable>
         ) : null}
+
+        <WeeklyChallengeCard />
 
         <WeeklyLeaderboard />
 

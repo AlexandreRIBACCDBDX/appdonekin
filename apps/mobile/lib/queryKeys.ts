@@ -19,6 +19,7 @@ export const queryKeys = {
   promiseVotes: (projectId: string) => ['projects', projectId, 'promise-votes'] as const,
   activity: (circleId: string) => ['circles', circleId, 'activity'] as const,
   leaderboard: (circleId: string) => ['circles', circleId, 'leaderboard'] as const,
+  weeklyChallenge: (circleId: string) => ['circles', circleId, 'weekly-challenge'] as const,
   notifications: ['notifications'] as const,
   invitations: (circleId: string) => ['circles', circleId, 'invitations'] as const,
 } as const;

@@ -27,7 +27,8 @@ export type PointTransactionType =
   | 'refund'
   | 'admin_adjustment'
   | 'late_penalty'
-  | 'project_payment';
+  | 'project_payment'
+  | 'weekly_challenge_bonus';
 export type InvitationStatus = 'pending' | 'accepted' | 'declined' | 'expired' | 'revoked';
 export type ProfileStatus = 'active' | 'suspended' | 'disabled' | 'deleted';
 export type PlatformRole = 'super_admin' | 'admin' | 'support' | 'moderator' | 'read_only';
@@ -62,6 +63,7 @@ export type Circle = {
   type: CircleType;
   avatar_url: string | null;
   invite_code: string;
+  weekly_challenge_target: number | null;
   created_by_user_id: string;
   created_at: string;
   archived_at: string | null;
@@ -578,6 +580,7 @@ export type Database = {
         Args: { p_circle_id: string };
         Returns: { member_id: string; first_name: string; avatar_url: string | null; points_earned: number }[];
       };
+      get_circle_weekly_challenge: { Args: { p_circle_id: string }; Returns: Json };
       create_invitation: {
         Args: {
           p_circle_id: string;

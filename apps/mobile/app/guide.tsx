@@ -110,6 +110,12 @@ export default function GuideScreen() {
           C'est volontairement un classement « doux » : seul le top 3 apparaît en entier. Si tu n'y es pas, tu ne
           vois que ta propre place, jamais un classement complet qui mettrait quelqu'un en dernier.
         </P>
+        <H4>Le défi de la semaine, en équipe</H4>
+        <P>
+          Juste au-dessus, un objectif commun à tout le cercle : cumuler assez de Dones ensemble avant dimanche.
+          Une fois atteint, chaque membre reçoit le même petit bonus — pas de classement ici, juste une réussite
+          collective.
+        </P>
       </Section>
 
       <Section eyebrow="Les enfants sans téléphone" title="Un profil géré, jamais un profil oublié">

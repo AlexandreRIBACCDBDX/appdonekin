@@ -11,14 +11,12 @@ import { TopChrome } from '@/components/features/TopChrome';
 import { BottomNav } from '@/components/features/BottomNav';
 import { ManagedChildrenBalances } from '@/components/features/ManagedChildrenBalances';
 import { WeeklyLeaderboard } from '@/components/features/WeeklyLeaderboard';
-import { Avatar } from '@/components/ui/Avatar';
 import { Card } from '@/components/ui/Card';
 import { PointsPill } from '@/components/ui/Badge';
 import { DonesAmount } from '@/components/ui/DonesAmount';
 import { DueCountdown } from '@/components/ui/DueCountdown';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { useTasks, usePendingValidations } from '@/hooks/useTasks';
-import { useCircleMembers } from '@/hooks/useMembers';
 import { useProjects, useProjectTasks, useProjectWallet } from '@/hooks/useProjects';
 import { projectProgress } from '@/services/projects';
 import type { Project } from '@/types/database';
@@ -31,7 +29,6 @@ export default function DashboardScreen() {
   const circleId = circle?.id ?? null;
   const { data: tasks, isFetching: tasksFetching } = useTasks(circleId);
   const { data: pendingValidations } = usePendingValidations(circleId);
-  const { data: members } = useCircleMembers(circleId);
   const { data: projects } = useProjects(circleId);
 
   const myTasks = useMemo(
@@ -97,23 +94,6 @@ export default function DashboardScreen() {
             </View>
           </Card>
         ))}
-      </Section>
-
-      <Section title={circle.name} onSeeAll={() => router.push('/(app)/circle/members')}>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.lg }}>
-          {(members ?? []).map((member) => (
-            <Pressable
-              key={member.id}
-              onPress={() => router.push({ pathname: '/(app)/circle/member/[id]', params: { id: member.id } })}
-              style={{ alignItems: 'center', gap: spacing.xs, width: 64 }}
-            >
-              <Avatar name={member.first_name} uri={member.avatar_url} />
-              <Text numberOfLines={1} style={[typography.caption, { color: colors.textSecondary }]}>
-                {member.first_name}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
       </Section>
 
       {projects && projects.length > 0 ? (
